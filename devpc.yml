@@ -1,0 +1,83 @@
+---
+# Börja med att köra följande kommandon i terminalen:
+# 1. sudo easy_install pip
+# 2. sudo pip install ansible
+# 3. ansible-playbook folder-with-playbook/devpc.yml
+#
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: install homebrew
+      shell: '/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
+
+    - name: setup homebrew cask
+      homebrew_tap:
+        name: homebrew/cask
+        state: present
+
+    - name: brew cask apps ftw
+      homebrew_cask:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - google-chrome
+        - spotify
+        - iterm2
+        - firefox
+        - slack
+        - visual-studio-code
+        - lastpass
+    
+    - name: homebrew apps ftw!
+      homebrew:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - go
+        - httpie
+    
+    - name: disable natural scroll
+      osx_defaults:
+        key: com.apple.swipescrolldirection
+        type: bool
+        value: false
+
+    - name: finder set enable
+      osx_defaults:
+        domain: com.apple.finder
+        key: "{{ item }}"
+        type: bool
+        value: true
+      with_items:
+        - ShowStatusBar
+        - ShowPathbar
+        - ShowTabView
+        - AppleShowAllFiles
+        - _FXShowPosixPathInTitle
+        - QLEnableTextSelection
+
+
+    - name: disable siri (1)
+      osx_defaults:
+        domain: com.apple.Siri
+        key: '{{ item }}'
+        type: bool
+        value: true
+      with_items:
+        - Disabled
+        - UserHasDeclinedEnable
+
+    - name: disable siri (2)
+      osx_defaults: 
+        domain: com.apple.Siri
+        key: StatusMenuVisible
+        type: bool
+        value: false
+
+    - name: disable siri (3)
+      osx_defaults: 
+        domain: com.apple.assistant.support
+        key: "Assistant Enabled"
+        type: bool
+        value: false
+# eof
