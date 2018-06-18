@@ -35,6 +35,7 @@
       loop:
         - go
         - httpie
+        - git
     
     - name: disable natural scroll
       osx_defaults:
@@ -56,28 +57,18 @@
         - _FXShowPosixPathInTitle
         - QLEnableTextSelection
 
-
-    - name: disable siri (1)
+    - name: disable siri
       osx_defaults:
-        domain: com.apple.Siri
-        key: '{{ item }}'
+        domain: "{{ item.domain }}"
+        key: "{{ item.key }}"
         type: bool
-        value: true
-      with_items:
-        - Disabled
-        - UserHasDeclinedEnable
+        value: "{{ item.value }}"
+      loop:
+        - { domain: "com.apple.Siri", key: "Disabled", value: true }
+        - { domain: "com.apple.Siri", key: "UserHasDeclinedEnable", value: true }
+        - { domain: "com.apple.Siri", key: "StatusMenuVisible", value: false }
+        - { domain: "com.apple.assistant.support", key: "Assistant Enabled", value: false }
 
-    - name: disable siri (2)
-      osx_defaults: 
-        domain: com.apple.Siri
-        key: StatusMenuVisible
-        type: bool
-        value: false
-
-    - name: disable siri (3)
-      osx_defaults: 
-        domain: com.apple.assistant.support
-        key: "Assistant Enabled"
-        type: bool
-        value: false
-# eof
+    - name: set defaults for Control Strip
+      shell: cat files/controlstrip.plist | defaults import - ~/Library/Preferences/com.apple.controlstrip.plist && killall ControlStrip
+      
