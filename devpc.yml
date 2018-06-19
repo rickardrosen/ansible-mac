@@ -11,7 +11,7 @@
       loop:
         - "{{ ansible_user_dir }}/.config"
         - "{{ ansible_user_dir }}/.config/iterm2"
-        
+
     - name: install homebrew
       shell: '/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
       register: gethomebrew_result
@@ -51,7 +51,7 @@
       osx_defaults:
         key: com.apple.swipescrolldirection
         type: bool
-        value: "{{ natural_scroll | default(false) }}"
+        value: "{{ i_am_a_pilot | default(false) }}"
 
     - name: finder set enable
       osx_defaults:
@@ -92,10 +92,15 @@
         src: templates/zshrc.j2
         dest: ~/.zshrc
 
-    - name: get the iterm2 font
+    - name: get the iterm2 fonts and color themes
       get_url: 
-        url: "https://raw.githubusercontent.com/powerline/fonts/master/Meslo%20Slashed/Meslo%20LG%20M%20Regular%20for%20Powerline.ttf"
-        dest: "~/Library/Fonts/Meslo LG M Regular for Powerline.ttf"
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - {url: "https://raw.githubusercontent.com/powerline/fonts/master/SourceCodePro/Source%20Code%20Pro%20for%20Powerline.otf", dest: "~/Library/Fonts/Source Code Pro for Powerline.ttf"}
+        - {url: "https://raw.githubusercontent.com/powerline/fonts/master/Meslo%20Slashed/Meslo%20LG%20M%20Regular%20for%20Powerline.ttf", dest: "~/Library/Fonts/Meslo LG M Regular for Powerline.ttf"}
+        - {url: "https://raw.githubusercontent.com/altercation/solarized/master/iterm2-colors-solarized/Solarized%20Dark.itermcolors", dest: "{{ ansible_user_dir }}/.config/iterm2/Solarized Dark.itermcolors"}
+        - {url: "https://raw.githubusercontent.com/altercation/solarized/master/iterm2-colors-solarized/Solarized%20Light.itermcolors", dest: "{{ ansible_user_dir }}/.config/iterm2/Solarized Light.itermcolors"}
 
     - name: set iTerm2 to load config from files
       osx_defaults:
