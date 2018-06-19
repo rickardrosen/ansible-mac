@@ -1,14 +1,12 @@
 ---
-# Börja med att köra följande kommandon i terminalen:
-# 1. sudo easy_install pip
-# 2. sudo pip install ansible
-# 3. ansible-playbook folder-with-playbook/devpc.yml
-#
+
 - hosts: localhost
   connection: local
   tasks:
     - name: install homebrew
       shell: '/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
+      register: gethomebrew_result
+      changed_when: "'up-to-date' not in gethomebrew_result.stdout"
 
     - name: setup homebrew cask
       homebrew_tap:
@@ -36,12 +34,13 @@
         - go
         - httpie
         - git
+        - zsh
     
     - name: disable natural scroll
       osx_defaults:
         key: com.apple.swipescrolldirection
         type: bool
-        value: false
+        value: "{{ natural_scroll | default(false) }}"
 
     - name: finder set enable
       osx_defaults:
@@ -69,6 +68,10 @@
         - { domain: "com.apple.Siri", key: "StatusMenuVisible", value: false }
         - { domain: "com.apple.assistant.support", key: "Assistant Enabled", value: false }
 
-    - name: set defaults for Control Strip
+    - name: set defaults for Control Strip (will always overwrite current config as of now..)
       shell: cat files/controlstrip.plist | defaults import - ~/Library/Preferences/com.apple.controlstrip.plist && killall ControlStrip
       
+    - name: 'get "oh my zsh"'
+      shell: sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+      register: getohmyzsh_result
+      changed_when: "'You already have Oh My Zsh installed' not in getohmyzsh_result.stdout"
