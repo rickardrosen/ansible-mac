@@ -34,6 +34,7 @@
         - slack
         - visual-studio-code
         - lastpass
+        - postman
     
     - name: homebrew apps ftw!
       homebrew:
@@ -46,6 +47,8 @@
         - zsh
         - zsh-syntax-highlighting
         - jq
+        - docker
+        - docker-compose
     
     - name: disable natural scroll
       osx_defaults:
