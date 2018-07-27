@@ -49,15 +49,22 @@
         - jq
         - terraform
 
-    - name: get limes binary
+    - name: Download Docker.dmg - install manually
       get_url:
-          dest: /usr/local/bin/limes 
-          owner: root
-          group: wheel
-          mode: 4755
-          url: 'https://github-production-release-asset-2e65be.s3.amazonaws.com/51735614/9ccb0212-9182-11e6-87bf-fb5f6dd6908e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20180719%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20180719T080906Z&X-Amz-Expires=300&X-Amz-Signature=da39214d38a20225c6940ec40d15344e6a5b51875383da90673394fa5293a103&X-Amz-SignedHeaders=host&actor_id=12249718&response-content-disposition=attachment%3B%20filename%3Dlimes_darwin_amd64&response-content-type=application%2Foctet-stream'
-      become: yes
+        dest: ~/Downloads/Docker.dmg
+        url: https://download.docker.com/mac/stable/Docker.dmg
+      tags:
+        - docker
 
+#    - name: get limes binary
+#      get_url:
+#          dest: /usr/local/bin/limes 
+#          owner: root
+#          group: wheel
+#          mode: 4755
+#          url: 'https://github-production-release-asset-2e65be.s3.amazonaws.com/51735614/9ccb0212-9182-11e6-87bf-fb5f6dd6908e?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20180719%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20180719T080906Z&X-Amz-Expires=300&X-Amz-Signature=da39214d38a20225c6940ec40d15344e6a5b51875383da90673394fa5293a103&X-Amz-SignedHeaders=host&actor_id=12249718&response-content-disposition=attachment%3B%20filename%3Dlimes_darwin_amd64&response-content-type=application%2Foctet-stream'
+#      become: yes
+#
     - name: disable natural scroll
       osx_defaults:
         key: com.apple.swipescrolldirection
