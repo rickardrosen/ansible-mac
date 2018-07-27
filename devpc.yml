@@ -49,6 +49,7 @@
         - jq
         - terraform
 
+# Docker for Mac download url is hidden behind login nowadays so well download here
     - name: Download Docker.dmg - install manually
       get_url:
         dest: ~/Downloads/Docker.dmg
