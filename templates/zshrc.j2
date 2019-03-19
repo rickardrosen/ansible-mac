@@ -49,8 +49,6 @@ ZSH_THEME="agnoster"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
   git
-  golang
-  terraform
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -69,3 +67,101 @@ HIST_STAMPS="yyyy-mm-dd"
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source {{ ansible_user_dir }}/.github_token
 PATH=$HOME/go/bin:$PATH
+
+
+# bindkey below will fix a "bug" (skit bakom spakarna...) when using non-us keyboard (possibly swedish) and pressing alt-space instead of just space by mistake on mac keyboard. 
+bindkey -s "\xC2\xA0" " "
+
+#### SAVE YOUR KEYBOARD KUBERNETES ALIASES #######
+
+k8slogs () {
+## example "k8slogs aws" will grep logs for pods starting with 'aws'
+        if [ -z "$1" ]
+            then
+                echo "\no argument, quitting!"
+                return 1
+            else
+                kubectl get pods --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl logs "$i " --all-containers -n " $1)}}}'
+        fi     
+}
+
+
+getk8spod () {
+        kubectl get pods --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl get pods "$i " -n " $1)}}}'
+}
+
+describek8spod () {
+        kubectl get pods --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl describe pods "$i " -n " $1)}}}'
+}
+
+getk8sdeployment () {
+        kubectl get deployment --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl describe deployment "$i " -n " $1)}}}'
+}
+
+getk8ssvc () {
+        kubectl get svc --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl describe svc "$i " -n " $1)}}}'
+}
+
+
+k8x () {
+        DATA=`kubectl get pods --all-namespaces -o wide`
+        C=`echo $DATA|grep $1 |cut -d' ' -f4|head -1`
+        N=`echo $DATA|grep $1 |cut -d' ' -f1|head -1`
+        kubectl exec -n $N -it $C -- $2 $3 $4
+}
+
+
+
+execk8spods () {
+        kubectl get pods --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl exec -it "$i " -n " $1 -- $2)}}}'
+}
+
+describek8spvc () {
+        kubectl get pvc --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl describe pvc "$i " -n " $1)}}}'
+}
+
+describek8ssvcmonitor () {
+        kubectl get servicemonitor --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl describe servicemonitor "$i " -n " $1)}}}'
+}
+
+describek8sstateset () {
+        kubectl get statefulset --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl describe statefulset "$i " -n " $1)}}}'
+}
+
+alias k8sexec='execk8spods'
+alias k8screate='kubectl create'
+alias k8snodes='kubectl get nodes -o wide'
+alias k8spods='kubectl get pods --all-namespaces -o wide'
+alias k8spod='getk8spod'
+alias k8ssvc='kubectl get svc --all-namespaces -o wide'
+alias k8sdset='kubectl get daemonset --all-namespaces -o wide'
+alias k8sconfig='kubectl get configmap --all-namespaces -o wide'
+alias k8sdescconfig='kubectl describe configmap --all-namespaces -o wide'
+alias k8slogs='getk8slogs'
+alias k8sdescpod='describek8spod'
+alias k8sdescsvc='kubectl describe svc'
+alias k8sdescdset='kubectl describe daemonset --all-namespaces'
+alias k8sdescsvc='getk8ssvc'
+alias k8scron='kubectl get cronjob --all-namespaces -o wide'
+alias k8sdesccron='kubectl describe cronjob --all-namespaces'
+alias k8sjob='kubectl get job --all-namespaces -o wide'
+alias k8sdeployment='kubectl get deployment --all-namespaces -o wide'
+alias k8sdescdeployment='getk8sdeployment'
+alias k8snamespace='kubectl get namespaces'
+alias k8spvc='kubectl get pvc --all-namespaces'
+alias k8sdescpvc='describek8spvc'
+alias k8sstorage='kubectl get storageclass'
+alias k8ssvcmonitor='kubectl get servicemonitor --all-namespaces'
+alias k8sdescsvcmonitor='describek8ssvcmonitor'
+alias k8sstateset='kubectl get statefulset --all-namespaces'
+alias k8sdescstateset='describek8sstateset'
+bastion () {
+  REGION="${2:-eu-north-1}"
+  MASTER1=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=workers-${1}" --query "Reservations[*].Instances[*].PrivateIpAddress" --output=text --region=${REGION} |tr "\t" "\n" |sort|uniq|head -1)
+  BASTION=$(aws elb describe-load-balancers --region ${REGION} --no-paginate --query "LoadBalancerDescriptions[?LoadBalancerName=='bastion-elb-${1}'].DNSName" --output=text)
+  echo "ssh -oStrictHostKeyChecking=no -J ubuntu@${BASTION}  ec2-user@${MASTER1}"
+  ssh -oStrictHostKeyChecking=no -J ubuntu@${BASTION}  ec2-user@${MASTER1}
+}
+alias k8ssh='bastion'
+
+#################################################
