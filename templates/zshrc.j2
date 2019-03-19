@@ -80,9 +80,9 @@ k8slogs () {
             then
                 echo "\no argument, quitting!"
                 return 1
-            else
-                kubectl get pods --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl logs "$i " --all-containers -n " $1)}}}'
-        fi     
+        fi
+kubectl get pods --all-namespaces -o wide | awk -v reg=$1 '{for (i=1;i<=NF;i++){if($i ~ "^" reg ".*"){system("kubectl logs "$i " --all-containers -n " $1)}}}'
+
 }
 
 
