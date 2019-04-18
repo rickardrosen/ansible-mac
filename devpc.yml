@@ -1,7 +1,65 @@
 ---
-
 - hosts: localhost
   connection: local
+  vars:
+    golang_default_packages:
+      - golang.org/x/tools/cmd/goimports
+      - golang.org/x/tools/cmd/cover
+      - golang.org/x/tools/cmd/godoc
+      - golang.org/x/tools/go/packages
+      - golang.org/x/lint/golint
+      - github.com/golang/dep/cmd/dep
+      - github.com/tools/godep
+      - github.com/mitchellh/gox
+      - github.com/spf13/viper
+      - github.com/spf13/cobra
+
+
+    dockitems_to_remove:
+      - Launchpad
+      - Mail
+      - Safari
+      - Contacts
+      - Notes
+      - Reminders
+      - Maps
+      - Photos
+      - Messages
+      - FaceTime
+      - iTunes
+      - iBooks
+      - App Store
+      - System Preferences
+      - Calendar
+      - Siri
+    
+    dockitems_to_persist:
+      - name: Google Chrome
+        path: "/Applications/Google Chrome.app"
+        pos: 1
+      - name: Firefox
+        path: "/Applications/Firefox.app"
+        pos: 2
+      - name: Visual Studio Code
+        path: /Applications/Visual Studio Code.app
+        pos: 3
+      - name: Slack
+        path: /Applications/Slack.app
+        pos: 4
+      - name: iTerm
+        path: /Applications/iTerm.app
+        pos: 5
+      - name: Spotify
+        path: /Applications/Spotify.app
+        pos: 6
+#      - name: Postman
+#        path: /Applications/Postman.app
+#        pos: 7
+  handlers:
+    - name: restart AppStore
+      command: killall "AppStore"
+      ignore_errors: yes
+
   tasks:
 
     - name: create .config-directory
@@ -34,7 +92,7 @@
         - slack
         - visual-studio-code
         - lastpass
-        - postman
+        #- postman
     
     - name: homebrew apps ftw!
       homebrew:
@@ -42,12 +100,12 @@
         state: latest
       loop:
         - go
-        - httpie
         - git
         - zsh
         - zsh-syntax-highlighting
         - jq
         - terraform
+        - dockutil
 
 # Docker for Mac download url is hidden behind login nowadays so well download here
 # BIG WARNING: Docker for Mac eats CPU cykles. Beware.
@@ -62,7 +120,7 @@
       osx_defaults:
         key: com.apple.swipescrolldirection
         type: bool
-        value: "{{ i_am_a_pilot | default(false) }}"
+        value: "{{ natural_scroll | default(false) }}"
 
     - name: finder set enable
       osx_defaults:
@@ -90,9 +148,85 @@
         - { domain: "com.apple.Siri", key: "StatusMenuVisible", value: false }
         - { domain: "com.apple.assistant.support", key: "Assistant Enabled", value: false }
 
-    - name: set defaults for Control Strip (= the damn "Touch Bar") (will always overwrite current config as of now..)
-      shell: cat files/controlstrip.plist | defaults import - ~/Library/Preferences/com.apple.controlstrip.plist && killall ControlStrip
-      
+    - name: Avoid creating .DS_Store files on network volumes
+      osx_defaults:
+        domain: com.apple.desktopservices
+        key: DSDontWriteNetworkStores
+        type: bool
+        value: true
+
+
+    - name: autohide dock
+      osx_defaults:
+        domain: com.apple.dock
+        key: autohide
+        type: bool
+        value: true
+
+    - name: autohide dock delay
+      osx_defaults:
+        domain: com.apple.dock
+        key: autohide-delay
+        type: float
+        value: 0
+
+    - name: Avoid creating .DS_Store files on network volumes
+      osx_defaults:
+        domain: com.apple.desktopservices
+        key: DSDontWriteNetworkStores
+        type: bool
+        value: true
+
+
+    - name: "AppStore - Automatically check for updates"
+      osx_defaults: 
+        domain: com.apple.SoftwareUpdate
+        key: "{{ item }}"
+        type: bool
+        value: true
+      notify: restart AppStore
+      loop:
+        - 'AutomaticCheckEnabled'
+        - 'AutomaticDownload'
+        - 'ConfigDataInstall'
+        - 'CriticalUpdateInstall'
+      tags:
+        - appstore
+
+    - name: "AppStore - automatically install "
+      osx_defaults: 
+        domain: com.apple.commerce
+        key: "{{ item }}"
+        type: bool
+        value: true
+      notify: restart AppStore
+      loop:
+        - 'AutoUpdate'
+        - 'AutoUpdateRestartRequired'
+      tags:
+        - appstore
+
+    - name: "AppStore - update check frequency"
+      osx_defaults: 
+        domain: com.apple.SoftwareUpdate
+        key: "{{ item }}"
+        type: int
+        value: 2
+      notify: restart AppStore
+      loop:
+        - 'ScheduleFrequency'
+      tags:
+        - appstore
+
+
+
+#    - name: set defaults for Control Strip (= the damn "Touch Bar") (will always overwrite current config as of now..)
+#      shell: cat files/controlstrip.plist | defaults import - ~/Library/Preferences/com.apple.controlstrip.plist && killall ControlStrip
+
+    - name: Stop iTunes from responding to the keyboard media keys
+      shell: launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
+
+
     - name: 'get "oh my zsh"'
       shell: sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
       register: getohmyzsh_result
@@ -132,3 +266,44 @@
         src: templates/com.googlecode.iterm2.plist.j2
         dest: "{{ ansible_user_dir }}/.config/iterm2/com.googlecode.iterm2.plist"
 
+### Remove crap from Dock with "dockutil"
+# https://blog.vandenbrand.org/2016/01/04/how-to-automate-your-mac-os-x-setup-with-ansible/
+
+
+    - name: Remove all crap from Dock
+      shell: dockutil --remove '{{ item }}'
+      ignore_errors: true
+      loop: "{{dockitems_to_remove}}"
+      tags:
+        - dock
+    
+    - name: Check if items in dock exist
+      shell: dockutil --find '{{ item.name }}' || dockutil --add '{{ item.path }}'
+      loop: "{{dockitems_to_persist}}"
+      tags:
+        - dock
+
+    - name: Fix order
+      shell: dockutil --move '{{ item.name }}' --position {{ item.pos }}
+      loop: "{{dockitems_to_persist}}"
+      tags:
+        - dock
+
+### Setup Go defaults
+    - name: Go path dirs
+      file: 
+        path: "{{ ansible_user_dir }}/go/{{ item }}"
+        state: directory
+      loop:
+        - src
+        - pkg
+        - bin
+      tags:
+        - golang
+
+    - name: Install golang packages
+      command: "go get -u -v {{ item }}"
+      loop: "{{ golang_default_packages }}"
+      ignore_errors: yes
+      tags:
+        - golang
