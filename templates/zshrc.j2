@@ -65,8 +65,9 @@ HIST_STAMPS="yyyy-mm-dd"
 # fi
 
 source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source {{ ansible_user_dir }}/.github_token
+#source {{ ansible_user_dir }}/.github_token
 PATH=$HOME/go/bin:$PATH
+GOPATH=$HOME/go
 
 
 # bindkey below will fix a "bug" (skit bakom spakarna...) when using non-us keyboard (possibly swedish) and pressing alt-space instead of just space by mistake on mac keyboard. 
