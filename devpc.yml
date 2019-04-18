@@ -121,6 +121,7 @@
         key: com.apple.swipescrolldirection
         type: bool
         value: "{{ natural_scroll | default(false) }}"
+      tags: [scroll]
 
     - name: finder set enable
       osx_defaults:
@@ -177,47 +178,46 @@
         type: bool
         value: true
 
+## Needs iCloud login OR root privileges OR both?
+    # - name: "AppStore - Automatically check for updates"
+    #   osx_defaults: 
+    #     domain: com.apple.SoftwareUpdate
+    #     key: "{{ item }}"
+    #     type: bool
+    #     value: true
+    #   notify: restart AppStore
+    #   loop:
+    #     - 'AutomaticCheckEnabled'
+    #     - 'AutomaticDownload'
+    #     - 'ConfigDataInstall'
+    #     - 'CriticalUpdateInstall'
+    #   tags:
+    #     - appstore
 
-    - name: "AppStore - Automatically check for updates"
-      osx_defaults: 
-        domain: com.apple.SoftwareUpdate
-        key: "{{ item }}"
-        type: bool
-        value: true
-      notify: restart AppStore
-      loop:
-        - 'AutomaticCheckEnabled'
-        - 'AutomaticDownload'
-        - 'ConfigDataInstall'
-        - 'CriticalUpdateInstall'
-      tags:
-        - appstore
+    # - name: "AppStore - automatically install "
+    #   osx_defaults: 
+    #     domain: com.apple.commerce
+    #     key: "{{ item }}"
+    #     type: bool
+    #     value: true
+    #   notify: restart AppStore
+    #   loop:
+    #     - 'AutoUpdate'
+    #     - 'AutoUpdateRestartRequired'
+    #   tags:
+    #     - appstore
 
-    - name: "AppStore - automatically install "
-      osx_defaults: 
-        domain: com.apple.commerce
-        key: "{{ item }}"
-        type: bool
-        value: true
-      notify: restart AppStore
-      loop:
-        - 'AutoUpdate'
-        - 'AutoUpdateRestartRequired'
-      tags:
-        - appstore
-
-    - name: "AppStore - update check frequency"
-      osx_defaults: 
-        domain: com.apple.SoftwareUpdate
-        key: "{{ item }}"
-        type: int
-        value: 2
-      notify: restart AppStore
-      loop:
-        - 'ScheduleFrequency'
-      tags:
-        - appstore
-
+    # - name: "AppStore - update check frequency"
+    #   osx_defaults: 
+    #     domain: com.apple.SoftwareUpdate
+    #     key: "{{ item }}"
+    #     type: int
+    #     value: 2
+    #   notify: restart AppStore
+    #   loop:
+    #     - 'ScheduleFrequency'
+    #   tags:
+    #     - appstore
 
 
 #    - name: set defaults for Control Strip (= the damn "Touch Bar") (will always overwrite current config as of now..)
