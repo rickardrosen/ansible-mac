@@ -307,3 +307,8 @@
       ignore_errors: yes
       tags:
         - golang
+
+    - name: set zsh as default shell
+      shell: |
+        sudo chsh -s /usr/local/bin/zsh {{ ansible_user_id }}
+      tags: [default_shell]
