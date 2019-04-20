@@ -1,0 +1,40 @@
+---
+    - name: install homebrew
+      shell: '/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"'
+      register: gethomebrew_result
+      changed_when: "'up-to-date' not in gethomebrew_result.stdout"
+
+    - name: setup homebrew cask
+      homebrew_tap:
+        name: homebrew/cask
+        state: present
+
+    - name: brew cask apps ftw
+      homebrew_cask:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - google-chrome
+        - spotify
+        - iterm2
+        - firefox
+        - slack
+        - visual-studio-code
+        - lastpass
+    
+    - name: homebrew apps ftw!
+      homebrew:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - go
+        - git
+        - zsh
+        - zsh-syntax-highlighting
+        - jq
+        - terraform
+        - vault
+        - consul
+        - nomad
+        - packer
+        - dockutil

@@ -1,0 +1,15 @@
+---
+    - name: 'get "oh my zsh"'
+      shell: sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+      register: getohmyzsh_result
+      changed_when: "'You already have Oh My Zsh installed' not in getohmyzsh_result.stdout"
+
+    - name: template out .zshrc
+      template:
+        src: templates/zshrc.j2
+        dest: ~/.zshrc
+      
+    - name: set zsh as default shell
+      shell: |
+        sudo chsh -s /usr/local/bin/zsh {{ ansible_user_id }}
+      tags: [default_shell]

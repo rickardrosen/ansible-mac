@@ -1,0 +1,71 @@
+
+    - name: disable natural scroll
+      osx_defaults:
+        key: com.apple.swipescrolldirection
+        type: bool
+        value: "{{ natural_scroll | default(false) }}"
+      tags: [scroll]
+
+    - name: show more info in Finder
+      osx_defaults:
+        domain: com.apple.finder
+        key: "{{ item }}"
+        type: bool
+        value: true
+      with_items:
+        - ShowStatusBar
+        - ShowPathbar
+        - ShowTabView
+        - AppleShowAllFiles
+        - _FXShowPosixPathInTitle
+        - QLEnableTextSelection
+
+    - name: disable siri
+      osx_defaults:
+        domain: "{{ item.domain }}"
+        key: "{{ item.key }}"
+        type: bool
+        value: "{{ item.value }}"
+      loop:
+        - { domain: "com.apple.Siri", key: "Disabled", value: true }
+        - { domain: "com.apple.Siri", key: "UserHasDeclinedEnable", value: true }
+        - { domain: "com.apple.Siri", key: "StatusMenuVisible", value: false }
+        - { domain: "com.apple.assistant.support", key: "Assistant Enabled", value: false }
+
+    - name: Avoid creating .DS_Store files on network volumes
+      osx_defaults:
+        domain: com.apple.desktopservices
+        key: DSDontWriteNetworkStores
+        type: bool
+        value: true
+
+    - name: autohide dock
+      osx_defaults:
+        domain: com.apple.dock
+        key: "{{ item.key }}"
+        type: "{{ item.type }}"
+        value: "{{ item.value }}"
+      loop:
+        - { type: bool, key: "autohide", value: true }
+        - { type: float, key: "autohide-delay", value: 0 }
+
+    - name: Avoid creating .DS_Store files on network volumes
+      osx_defaults:
+        domain: com.apple.desktopservices
+        key: DSDontWriteNetworkStores
+        type: bool
+        value: true
+
+    - name: Fast key repeat
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: KeyRepeat
+        type: int
+        value: 2
+
+    - name: Fast inital key repeat
+      osx_defaults:
+        domain: NSGlobalDomain
+        key: InitialKeyRepeat
+        type: int
+        value: 15

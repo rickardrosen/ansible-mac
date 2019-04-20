@@ -1,0 +1,9 @@
+---
+# Docker for Mac download url is hidden behind login nowadays so well download here
+# BIG WARNING: Docker for Mac eats CPU cykles. Beware.
+    - name: Download Docker.dmg - install manually if wanted
+      get_url:
+        dest: ~/Downloads/Docker.dmg
+        url: https://download.docker.com/mac/stable/Docker.dmg
+      tags:
+        - docker

@@ -1,0 +1,17 @@
+---
+
+
+    - import_tasks: brew.yml
+      tags: [brew, homebrew, osx]
+
+    - import_tasks: dock.yml
+      tags: [dock, osx]
+
+    - import_tasks: iterm.yml
+      tags: [apps, iterm]
+
+    - import_tasks: zsh.yml
+      tags: [apps, zsh]
+
+    - import_tasks: docker.yml
+      tags: [apps, docker]

@@ -1,0 +1,9 @@
+---
+
+
+- name: Stop iTunes from responding to the keyboard media keys
+  shell: launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
+
+- import_tasks: defaults.yml
+  tags: [defaults, osx_defaults, osx]
+

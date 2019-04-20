@@ -1,0 +1,23 @@
+---
+### Remove crap from Dock with "dockutil"
+# https://blog.vandenbrand.org/2016/01/04/how-to-automate-your-mac-os-x-setup-with-ansible/
+
+
+    - name: Remove all crap from Dock
+      shell: dockutil --remove '{{ item }}'
+      ignore_errors: true
+      loop: "{{dockitems_to_remove}}"
+      tags:
+        - dock
+    
+    - name: Check if items in dock exist
+      shell: dockutil --find '{{ item.name }}' || dockutil --add '{{ item.path }}'
+      loop: "{{dockitems_to_persist}}"
+      tags:
+        - dock
+
+    - name: Fix order
+      shell: dockutil --move '{{ item.name }}' --position {{ item.pos }}
+      loop: "{{dockitems_to_persist}}"
+      tags:
+        - dock
